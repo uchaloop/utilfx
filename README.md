@@ -2,36 +2,20 @@
 
 [![CI](https://github.com/uchaloop/utilfx/actions/workflows/ci.yml/badge.svg)](https://github.com/uchaloop/utilfx/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/uchaloop/utilfx.svg)](https://pkg.go.dev/github.com/uchaloop/utilfx)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/github/license/uchaloop/utilfx)](LICENSE)
 
-Small helpers for recurring [Uber Fx](https://pkg.go.dev/go.uber.org/fx)
-dependency wiring.
+Small helpers for common [Uber Fx](https://pkg.go.dev/go.uber.org/fx)
+dependency-wiring patterns.
 
-## Install
+## Installation
 
 ```bash
-go get github.com/uchaloop/utilfx@latest
+go get github.com/uchaloop/utilfx
 ```
 
 ## Bind
 
-`Bind` exposes an existing concrete service under an interface while preserving
-the concrete dependency in the graph.
-
-Without `utilfx`:
-
-```go
-func makeHandler(service *Service) Handler {
-	return service
-}
-
-fx.Provide(
-	makeService,
-	makeHandler,
-)
-```
-
-With `utilfx`:
+Expose a concrete service through an interface:
 
 ```go
 fx.Provide(
@@ -40,51 +24,22 @@ fx.Provide(
 )
 ```
 
-An incompatible binding is returned as an Fx constructor error.
+The concrete service remains available in the graph. An incompatible binding
+is reported as an Fx constructor error.
 
-## Grouped
+## Value groups
 
-`Grouped` registers one or more constructors in the same value group. Nil
-constructors are ignored.
-
-Without `utilfx`:
+Register constructors in one group:
 
 ```go
-fx.Provide(
-	fx.Annotate(makeHealthHandler, fx.ResultTags(`group:"http_handlers"`)),
-	fx.Annotate(makeMetricsHandler, fx.ResultTags(`group:"http_handlers"`)),
+utilfx.Grouped(
+	"http_handlers",
+	makeHealthHandler,
+	makeMetricsHandler,
 )
 ```
 
-With `utilfx`:
-
-```go
-utilfx.Grouped("http_handlers", makeHealthHandler, makeMetricsHandler)
-```
-
-## GroupedAs
-
-`GroupedAs` provides multiple implementations of one interface in a value
-group.
-
-Without `utilfx`:
-
-```go
-fx.Provide(
-	fx.Annotate(
-		makeHealthHandler,
-		fx.As(new(Handler)),
-		fx.ResultTags(`group:"http_handlers"`),
-	),
-	fx.Annotate(
-		makeMetricsHandler,
-		fx.As(new(Handler)),
-		fx.ResultTags(`group:"http_handlers"`),
-	),
-)
-```
-
-With `utilfx`:
+Register implementations of an interface:
 
 ```go
 utilfx.GroupedAs[Handler](
@@ -94,47 +49,23 @@ utilfx.GroupedAs[Handler](
 )
 ```
 
-## GroupedFor
-
-`GroupName` builds a group from a group name and an optional Fx name.
-`GroupedFor` uses that group to register constructors.
-
-Without `utilfx`:
+Build a group name for a named instance:
 
 ```go
-group := "database_options"
-if len(name) > 0 {
-	group += ":" + name
-}
+group := utilfx.GroupName("database_options", "analytics")
 
-option := fx.Provide(
-	fx.Annotate(makeOption, fx.ResultTags(`group:"`+group+`"`)),
+utilfx.GroupedFor(
+	"analytics",
+	"database_options",
+	makeOption,
 )
 ```
 
-With `utilfx`:
+`Grouped`, `GroupedAs`, and `GroupedFor` ignore nil constructors.
 
-```go
-group := utilfx.GroupName("database_options", name)
-option := utilfx.GroupedFor(name, "database_options", makeOption)
-```
+## Fx tags
 
-## Tags
-
-`NameTag`, `OptionalNameTag`, and `GroupTag` keep manual Fx annotations
-readable.
-
-Without `utilfx`:
-
-```go
-fx.Annotate(
-	makeClient,
-	fx.ParamTags(`name:"analytics" optional:"true"`),
-	fx.ResultTags(`name:"analytics"`),
-)
-```
-
-With `utilfx`:
+Build readable annotation tags:
 
 ```go
 fx.Annotate(
@@ -144,16 +75,7 @@ fx.Annotate(
 )
 ```
 
-For a value group, without `utilfx`:
-
-```go
-fx.Annotate(
-	makeHandler,
-	fx.ResultTags(`group:"http_handlers"`),
-)
-```
-
-With `GroupTag`:
+For value groups:
 
 ```go
 fx.Annotate(
@@ -162,24 +84,16 @@ fx.Annotate(
 )
 ```
 
+Available helpers:
+
+- `NameTag`
+- `OptionalNameTag`
+- `GroupTag`
+- `GroupName`
+
 ## ModuleFor
 
-`ModuleFor` selects a default module for an empty name and otherwise builds a
-named variant.
-
-Without `utilfx`:
-
-```go
-func moduleFor(name string) fx.Option {
-	if len(name) == 0 {
-		return Module
-	}
-
-	return makeNamedModule(name)
-}
-```
-
-With `utilfx`:
+Select the default module for an empty name and a named module otherwise:
 
 ```go
 func moduleFor(name string) fx.Option {
@@ -189,5 +103,9 @@ func moduleFor(name string) fx.Option {
 
 ## Acknowledgements
 
-Thanks to the creators and maintainers of [Uber Fx](https://github.com/uber-go/fx)
-for building the dependency injection framework that makes this package useful.
+I am grateful to the authors of [Uber Fx](https://github.com/uber-go/fx). Their
+work made this library possible.
+
+## License
+
+[MIT](LICENSE)
