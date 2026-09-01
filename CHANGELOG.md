@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-01
+
+### Changed
+
+- `GroupedFor` takes the group before the name, the order `Grouped`, `GroupedAs`
+  and `GroupName` already use. Both arguments are strings, so a call written from
+  the habit of the others compiled and fed a group nobody consumes. Swap the
+  arguments at any call site.
+- The package documentation carries what each helper does and why; the README is
+  a landing page. The package comment moved from `module.go` into `doc.go`.
+- The module is built with Go 1.27. A module that depends on this one has to
+  declare 1.27 as well.
+
 ## [0.1.1] - 2026-08-06
 
 ### Changed

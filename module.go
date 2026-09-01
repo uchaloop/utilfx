@@ -1,4 +1,3 @@
-// Package utilfx contains focused helpers for Fx dependency wiring.
 package utilfx
 
 import "go.uber.org/fx"

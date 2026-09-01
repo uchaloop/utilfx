@@ -1,6 +1,6 @@
 module github.com/uchaloop/utilfx
 
-go 1.26.1
+go 1.27
 
 require go.uber.org/fx v1.24.0
 

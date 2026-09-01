@@ -17,8 +17,10 @@ func GroupTag(group string) string {
 	return fmt.Sprintf(`group:"%s"`, group)
 }
 
-// GroupName returns group when name is empty. Otherwise it returns a group
-// name in the form "group:name".
+// GroupName returns the group a named instance feeds: group itself when name is
+// empty - the single default instance - and "group:name" otherwise. It is the
+// rule GroupedFor applies, exposed for a module that needs the name without
+// providing anything into it.
 func GroupName(group, name string) string {
 	if len(name) == 0 {
 		return group

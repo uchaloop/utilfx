@@ -14,9 +14,14 @@ func Grouped(group string, ctors ...any) fx.Option {
 	})
 }
 
-// GroupedFor provides constructors in a group composed from group and name.
-// Nil constructors are ignored.
-func GroupedFor(name, group string, ctors ...any) fx.Option {
+// GroupedFor provides constructors in the group a named instance feeds, composed
+// from group and name the way GroupName composes it. Nil constructors are
+// ignored.
+//
+// The group comes first, as it does in Grouped and GroupedAs and in GroupName:
+// both arguments are strings, so an order that differed between them would
+// swap silently and feed a group nobody consumes.
+func GroupedFor(group, name string, ctors ...any) fx.Option {
 	return Grouped(GroupName(group, name), ctors...)
 }
 
