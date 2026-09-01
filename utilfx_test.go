@@ -142,7 +142,7 @@ func TestGroupedFor(t *testing.T) {
 	var got []string
 	app := fx.New(
 		fx.NopLogger,
-		GroupedFor("analytics", "options", func() string { return "value" }),
+		GroupedFor("options", "analytics", func() string { return "value" }),
 		fx.Invoke(func(in struct {
 			fx.In
 

@@ -2,72 +2,36 @@
 
 [![CI](https://github.com/uchaloop/utilfx/actions/workflows/ci.yml/badge.svg)](https://github.com/uchaloop/utilfx/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/uchaloop/utilfx.svg)](https://pkg.go.dev/github.com/uchaloop/utilfx)
-[![License: MIT](https://img.shields.io/badge/github/license/uchaloop/utilfx)](LICENSE)
+[![License: MIT](https://img.shields.io/github/license/uchaloop/utilfx)](LICENSE)
 
-Small helpers for common [Uber Fx](https://pkg.go.dev/go.uber.org/fx)
-dependency-wiring patterns.
+Focused helpers for the [Uber Fx](https://pkg.go.dev/go.uber.org/fx) wiring
+patterns that come up in every application built on it.
 
-## Installation
+- **An interface without an adapter** - `Bind` hands the container a concrete
+  value under a contract, and says which types did not match when they do not.
+- **Value groups without repetition** - several constructors into one group, as
+  themselves or as an interface, nil entries ignored.
+- **Tags that are not hand-quoted** - where a typo turns into a dependency
+  nobody satisfies.
 
 ```bash
 go get github.com/uchaloop/utilfx
 ```
 
-## Bind
-
-Expose a concrete service through an interface:
+## Quick start
 
 ```go
 fx.Provide(
 	makeService,
-	utilfx.Bind[Handler, *Service],
+	utilfx.Bind[Handler, *Service],          // *Service is also still available
 )
-```
 
-The concrete service remains available in the graph. An incompatible binding
-is reported as an Fx constructor error.
-
-## Value groups
-
-Register constructors in one group:
-
-```go
-utilfx.Grouped(
+utilfx.GroupedAs[Handler](                   // both into one group, as Handler
 	"http_handlers",
 	makeHealthHandler,
 	makeMetricsHandler,
 )
-```
 
-Register implementations of an interface:
-
-```go
-utilfx.GroupedAs[Handler](
-	"http_handlers",
-	makeHealthHandler,
-	makeMetricsHandler,
-)
-```
-
-Build a group name for a named instance:
-
-```go
-group := utilfx.GroupName("database_options", "analytics")
-
-utilfx.GroupedFor(
-	"analytics",
-	"database_options",
-	makeOption,
-)
-```
-
-`Grouped`, `GroupedAs`, and `GroupedFor` ignore nil constructors.
-
-## Fx tags
-
-Build readable annotation tags:
-
-```go
 fx.Annotate(
 	makeClient,
 	fx.ParamTags(utilfx.OptionalNameTag("analytics")),
@@ -75,31 +39,19 @@ fx.Annotate(
 )
 ```
 
-For value groups:
-
-```go
-fx.Annotate(
-	makeHandler,
-	fx.ResultTags(utilfx.GroupTag("http_handlers")),
-)
-```
-
-Available helpers:
-
-- `NameTag`
-- `OptionalNameTag`
-- `GroupTag`
-- `GroupName`
-
-## ModuleFor
-
-Select the default module for an empty name and a named module otherwise:
+A library exposing one entry point for its default and named instances:
 
 ```go
 func moduleFor(name string) fx.Option {
 	return utilfx.ModuleFor(name, Module, makeNamedModule)
 }
 ```
+
+## Documentation
+
+What each helper does and the reasons behind it are in the package
+documentation:
+**[pkg.go.dev/github.com/uchaloop/utilfx](https://pkg.go.dev/github.com/uchaloop/utilfx)**.
 
 ## Acknowledgements
 
